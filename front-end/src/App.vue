@@ -10,7 +10,7 @@
     </div>
     <router-view class="wholePage"/>
     <footer class="footer">
-      <p class="footer-partner-name">Mitchell McCann and Jarod Thorley</p>
+      <p class="footer-partner-name"><strong>Mitchell McCann and Jarod Thorley</strong>       5 hours</p>
       <a class="footer-link" href="https://github.com/mccannmann/homeless-joe" target="_blank">Github</a>
     </footer>
   </div>
