@@ -10,6 +10,10 @@
       </div>
       <h3><strong>Description: </strong>{{ listingItem.description }}</h3>
     </div>
+    <div class="user-footer" v-if="user">
+      <p class="user-name">{{user.firstName}} {{user.lastName}}</p>
+      <button @click="logout">Logout</button>
+    </div>
   </div>
 
 </template>
@@ -28,6 +32,9 @@ export default {
     listings() {
       this.populateArray();
       return this.listingsArray.filter(listing => listing.apartmentName.toLowerCase().search(this.searchText.toLowerCase()) >= 0);
+    },
+    user() {
+      return this.$root.$data.user;
     }
   },
   methods: {
@@ -38,10 +45,25 @@ export default {
       } catch (error) {
         console.log(error);
       }
+    },
+    async logout() {
+      try {
+        await axios.delete("/api/logout");
+        this.$root.$data.user = null;
+      } catch (error) {
+        this.$root.$data.user = null;
+      }
+      this.$router.push({ name: 'Search'});
     }
   },
-  created() {
+  async created() {
     this.populateListing();
+    try {
+      let response = await axios.get('/api/login');
+      this.$root.$data.user = response.data.user;
+    } catch(error){
+      this.$root.$data.user = null;
+    }
   }
 }
 </script>

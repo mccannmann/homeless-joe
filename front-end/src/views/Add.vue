@@ -1,47 +1,48 @@
 <template>
-  <div class = "add">
+  <Login v-if="!user"/>
+  <div v-else class = "add">
     <h1>Add a Listing</h1>
     <form class="editForm">
-      <div class="formRow">
-        <h2>Username</h2>
-        <input type="text" v-model="username" value="item.apartmentName" />
-      </div>
-      <div class="formRow">
-        <h2>First Name</h2>
-        <input type="text" v-model="name" value="item.address" />
-      </div>
-      <div class="formRow">
-        <h2>Apartment Name</h2>
-        <input type="text" v-model="apartmentName" value="item.apartmentName" />
+      <div class="shortFormBox">
+        <div class="formRow">
+          <h2>Apartment Name</h2>
+          <input type="text" v-model="apartmentName" value="item.apartmentName" />
+        </div>
+        <div class="formRow">
+          <h2>Price Per Month</h2>
+          <input type="text" v-model="price" value="item.price" />
+        </div>
       </div>
       <div class="formRow">
         <h2>Address</h2>
         <input type="text" v-model="address" value="item.address" />
       </div>
       <div class="formRow">
-        <h2>Price Per Month</h2>
-        <input type="text" v-model="price" value="item.price" />
-      </div>
-      <div class="formRow">
         <h2>Description</h2>
-        <input type="text" v-model="description" value="item.description" />
+        <textarea type="text" v-model="description" value="item.description" />
       </div>
       <div class="formRow">
-        <button @click="addListing()">Add Listing</button>
+        <button class="addButton" @click="addListing()">Add Listing</button>
       </div>
     </form>
+    <div class="user-footer">
+      <p class="user-name">{{user.firstName}} {{user.lastName}}</p>
+      <button @click="logout">Logout</button>
+    </div>
   </div>
 </template>
 
 <script>
 // @ is an alias to /src
 import axios from "axios";
+import Login from '@/components/Login.vue';
 export default {
   name: "Home",
+  components: {
+    Login,
+  },
   data() {
     return {
-      username: "",
-      name: "",
       apartmentName: "",
       address: "",
       price: "",
@@ -52,8 +53,8 @@ export default {
     async addListing() {
       try {
         await axios.post("/api/listing", {
-          username: this.username,
-          firstName: this.name,
+          username: this.user.username,
+          firstName: this.user.firstName,
           apartmentName: this.apartmentName,
           price: this.price,
           address: this.address,
@@ -64,7 +65,28 @@ export default {
         console.log(error);
       }
     },
+    async logout() {
+      try {
+        await axios.delete("/api/logout");
+        this.$root.$data.user = null;
+      } catch (error) {
+        this.$root.$data.user = null;
+      }
+    }
   },
+  async created() {
+    try {
+      let response = await axios.get('/api/login');
+      this.$root.$data.user = response.data.user;
+    } catch(error){
+      this.$root.$data.user = null;
+    }
+  },
+  computed: {
+    user() {
+      return this.$root.$data.user;
+    }
+  }
 };
 </script>
 
@@ -78,13 +100,41 @@ export default {
 }
 
 .formRow {
-  width: 33%;
-  margin-bottom: 30px;
+  display: flex;
+  flex-direction: column;
+  width: 90%;
+  margin-bottom: 10px;
+  margin-left: 5%;
+  margin-right: 5%;
+}
+
+.formRow textarea,
+.formRow input {
+  border-radius: 20px;
+  border: none;
+  padding: 10px;
+  font-size: 16pt;
+}
+
+.formRow textArea {
+  height: 150px;
+}
+
+.shortFormBox {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.addButton {
+  align-self: flex-end;
 }
 
 .editForm {
   display: flex;
   justify-content: space-around;
+  flex-direction: column;
 }
 
 h1 {
