@@ -6,15 +6,17 @@
       </div>
       <router-link to="/">Home</router-link> |
       <router-link to="/add">Add</router-link> |
-      <router-link to="/search">Search</router-link>
+      <router-link to="/profile">Profile</router-link>
     </div>
-    <router-view />
+    <router-view class="wholePage"/>
     <footer class="footer">
       <p class="footer-partner-name">Mitchell McCann and Jarod Thorley</p>
       <a class="footer-link" href="https://github.com/mccannmann/homeless-joe" target="_blank">Github</a>
     </footer>
   </div>
 </template>
+
+
 
 <style>
 #app {
@@ -42,12 +44,30 @@
   color: #42b983;
 }
 
+button, a {
+  border-radius: 20px;
+}
+
+.user-footer {
+  display: flex;
+  justify-content: flex-end;
+  position: fixed;
+  bottom: 0;
+  right:0;
+  background-color: #1F8A8B;
+  color: white;
+  padding: 10px;
+  border-radius: 50px;
+  margin-bottom: 50px;
+  margin-right: 10px;
+}
+
 .navImg {
   width: 100%;
 }
 
 .footer-link {
-  color: black;
+  color: white;
   text-decoration: none;
   padding-right: 30px
 }
@@ -78,5 +98,10 @@
   margin-bottom: 0;
   margin-left: 20px;
   margin-right: 0;
+  color: white;
+}
+
+.wholePage {
+  margin-bottom: 80px;
 }
 </style>

@@ -1,8 +1,8 @@
 <template>
-  <div class="page">
+  <Login v-if="!user"/>
+  <div v-else class="page">
     <div class="usernameQuery">
-      <input type="text" v-model="username" />
-      <button @click="viewListings">View Listings</button>
+      <h2>Your Listings</h2>
     </div>
     <div class="items" v-for="(item, index) in listings" :key="item.id">
       <div class="item">
@@ -14,27 +14,33 @@
       </div>
       <div class="formContainer" v-if="isEditing[index]">
         <form class="editForm">
-          <div class="editFormItem">
-          <h2>Apartment Name</h2>
-          <input type="text" v-model="apartmentName" value="item.apartmentName" />
-        </div>
-        <div class="editFormItem">
-          <h2>Price Per Month</h2>
-          <input type="text" v-model="price" value="item.price" />
-        </div>
-        <div class="editFormItem">
-          <h2>Address</h2>
-          <input type="text" v-model="address" value="item.address" />
-        </div>
-        <div class="editFormItem">
-          <h2>Description</h2>
-          <input type="text" v-model="description" value="item.description" />
-        </div>
-        <div class="editFormItem">
-          <button @click="editListing(item, index)">Update Listing</button>
-        </div>
+          <div class="shortFormBox">
+            <div class="formRow">
+              <h2>Apartment Name</h2>
+              <input type="text" v-model="apartmentName" value="item.apartmentName" />
+            </div>
+            <div class="formRow">
+              <h2>Price Per Month</h2>
+              <input type="text" v-model="price" value="item.price" />
+            </div>
+          </div>
+          <div class="formRow">
+            <h2>Address</h2>
+            <input type="text" v-model="address" value="item.address" />
+          </div>
+          <div class="formRow">
+            <h2>Description</h2>
+            <textarea type="text" v-model="description" value="item.description" />
+          </div>
+          <div class="formRow">
+            <button class="addButton" @click="editListing(item, index)">Update Listing</button>
+          </div>
         </form>
       </div>
+    </div>
+    <div class="user-footer">
+      <p class="user-name">{{user.firstName}} {{user.lastName}}</p>
+      <button @click="logout">Logout</button>
     </div>
   </div>
 </template>
@@ -42,11 +48,14 @@
 <script>
 // @ is an alias to /src
 import axios from "axios";
+import Login from '@/components/Login.vue';
 export default {
-  name: "Home",
+  name: "Profile",
+  components: {
+    Login,
+  },
   data() {
     return {
-      username: "",
       name: "",
       listings: [],
       isEditing: [],
@@ -54,14 +63,12 @@ export default {
       address: "",
       price: "",
       description: "",
-      photoPath: "",
-      file: null,
     }
   },
   methods: {
     async viewListings() {
       try {
-        const response = await axios.get(`/api/user/${this.username}/listings`);
+        const response = await axios.get(`/api/user/${this.$root.$data.user.username}/listings`);
         this.listings = response.data;
         let array = [];
         for (let i = 0; i < this.listings.length; ++i) {
@@ -96,7 +103,7 @@ export default {
     },
     async deleteListing(id) {
       try {
-        await axios.delete(`/api/user/${this.username}/listings/${id}`);
+        await axios.delete(`/api/user/${this.user.username}/listings/${id}`);
         this.viewListings();
       } catch (error) {
         console.log(error);
@@ -105,7 +112,35 @@ export default {
     fileChanged(event) {
       this.file = event.target.files[0]
     },
+    async logout() {
+      try {
+        await axios.delete("/api/logout");
+        this.$root.$data.user = null;
+      } catch (error) {
+        this.$root.$data.user = null;
+      }
+    }
   },
+  async created() {
+    try {
+      let response = await axios.get('/api/login');
+      this.$root.$data.user = response.data.user;
+    } catch(error){
+      this.$root.$data.user = null;
+    }
+    this.viewListings();
+  },
+  computed: {
+    user() {
+      if (this.$root.$data.user != null) {
+        this.viewListings();
+        return this.$root.$data.user;
+      }
+      else {
+        return null;
+      }
+    }
+  }
 };
 </script>
 
@@ -127,6 +162,7 @@ export default {
   margin-left: 5%;
   margin-bottom: 25px;
   margin-right: 5%;
+  border-radius: 50px;
 }
 
 button,
@@ -155,28 +191,49 @@ button {
   display: flex;
   flex-direction: row;
   justify-content: center;
-  width: 70%;
-  margin-left: 15%;
-  margin-right: 15%;
+  width: 90%;
+  margin-left: 5%;
+  margin-right: 5%;
   height: auto;
+}
+
+.formRow {
+  display: flex;
+  flex-direction: column;
+  width: 90%;
+  margin-bottom: 10px;
+  margin-left: 5%;
+  margin-right: 5%;
+}
+
+.formRow textarea,
+.formRow input {
+  border-radius: 20px;
+  border: none;
+  padding: 10px;
+  font-size: 16pt;
+}
+
+.formRow textArea {
+  height: 150px;
+}
+
+.shortFormBox {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.addButton {
+  align-self: flex-end;
 }
 
 .editForm {
   display: flex;
-  flex-direction: row;
   justify-content: space-around;
-  flex-wrap: wrap;
-  width: 60%;
-  height: auto;
-}
-
-.formContainerItem h2{
-  font-size: 16px;
-}
-
-.editFormItem{
-  width: 50%;
-  margin-bottom: 20px;
+  flex-direction: column;
+  width: 100%;
 }
 
 </style>
